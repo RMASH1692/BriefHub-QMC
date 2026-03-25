@@ -37,18 +37,17 @@
             <input type="text" id="icao-input" placeholder="ICAO (RJTT RJAA...)">
         </div>
         <div class="radio-group">
-            <label><input type="radio" name="part-select" value="part1" checked> Part 1 のみ (QMCD98)</label>
-            <label><input type="radio" name="part-select" value="both"> Part 1 & Part 2 両方</label>
+            <label><input type="radio" name="part-select" value="part1" checked>Part 1 Only</label>
+            <label><input type="radio" name="part-select" value="both">Part 1 & 2</label>
         </div>
-        <button class="btn-search" onclick="searchImages()">検索・表示</button>
+        <button class="btn-search" onclick="searchImages()">Search</button>
         <br>
-        <button class="btn-pdf" id="btn-pdf" onclick="downloadPDF()">表示中の画像をPDFでダウンロード</button>
+        <button class="btn-pdf" id="btn-pdf" onclick="downloadPDF()">Download PDF</button>
     </div>
 
     <div id="result-container" class="result-container"></div>
 
     <script>
-        // ★ステップ1で作成したWorkerのURLに変更してください★
         const WORKER_URL = "https://taf-proxy.bbfn2187.workers.dev";
         
         // 取得した画像データを保持する配列（PDF化用）
@@ -151,7 +150,7 @@
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(16);
                 doc.setTextColor(0, 120, 212);
-                doc.text(`${imgObj.icao} Time-Series Forecast - ${imgObj.part}`, margin, margin + 5);
+                doc.text(`${imgObj.icao} Aerodrome Sequential Forecast - ${imgObj.part}`, margin, margin + 5);
 
                 // 画像の比率を維持してA4横幅に合わせる
                 const imgProps = doc.getImageProperties(imgObj.dataUrl);
@@ -161,7 +160,7 @@
                 doc.addImage(imgObj.dataUrl, 'PNG', margin, margin + 15, pdfImgWidth, pdfImgHeight);
             });
 
-            doc.save("TAF_Time_Series.pdf");
+            doc.save("BriefHub_QMC.pdf");
         }
     </script>
 </body>
