@@ -103,7 +103,7 @@
             for (const icao of icaos) {
                 const section = document.createElement('div');
                 section.className = 'card';
-                section.innerHTML = `<h3>${icao}</h3><p id="status-${icao}" style="color:#777; font-size:14px;">データ取得中...</p>`;
+                section.innerHTML = `<h3>${icao}</h3><p id="status-${icao}" style="color:#777; font-size:14px;">Loading...</p>`;
                 container.appendChild(section);
                 const statusEl = document.getElementById(`status-${icao}`);
 
@@ -129,7 +129,7 @@
                     statusEl.style.display = 'none';
                 } else {
                     statusEl.className = 'status-msg';
-                    statusEl.innerText = '該当する予報図が見つかりませんでした。';
+                    statusEl.innerText = '検索した空港の飛行場時系列予報は発行されていません。';
                 }
             }
         }
@@ -143,7 +143,7 @@
 
         function downloadPDF() {
             if (fetchedImages.length === 0) {
-                alert("表示されている画像がありません。先にSearchを実行してください。");
+                alert("表示されている画像がありません。先に検索を実行してください。");
                 return;
             }
 
