@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TAF 時系列予報ビューア</title>
+    <title>飛行場時系列予報</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; color: #333; background-color: #f9f9f9; }
@@ -30,11 +30,11 @@
 </head>
 <body>
 
-    <h2>TAF 時系列予報ビューア</h2>
+    <h2>飛行場時系列予報</h2>
     
     <div class="controls">
         <div class="input-group">
-            <input type="text" id="icao-input" placeholder="例: RJTT RJCC RJNK (スペース区切りで複数可)">
+            <input type="text" id="icao-input" placeholder="ICAO (RJTT RJAA...)">
         </div>
         <div class="radio-group">
             <label><input type="radio" name="part-select" value="part1" checked> Part 1 のみ (QMCD98)</label>
@@ -49,7 +49,7 @@
 
     <script>
         // ★ステップ1で作成したWorkerのURLに変更してください★
-        const WORKER_URL = "https://taf-proxy.your-subdomain.workers.dev";
+        const WORKER_URL = "https://taf-proxy.bbfn2187.workers.dev";
         
         // 取得した画像データを保持する配列（PDF化用）
         let fetchedImages = [];
