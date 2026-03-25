@@ -14,8 +14,8 @@
         button { padding: 10px 20px; font-size: 16px; background-color: #0078D4; color: white; border: none; cursor: pointer; border-radius: 4px; }
         button:hover { background-color: #005a9e; }
         
-        /* PDFボタンは画像取得後に表示するため初期状態は display: none */
-        .btn-pdf { background-color: #28a745; display: none; }
+        /* PDFボタンを最初から表示 */
+        .btn-pdf { background-color: #28a745; display: inline-block; }
         .btn-pdf:hover { background-color: #218838; }
         
         .options-group { display: flex; flex-direction: column; gap: 5px; }
@@ -24,7 +24,6 @@
         .card { border-left: 4px solid #0078D4; border-top: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 20px; margin-bottom: 20px; border-radius: 0 4px 4px 0; }
         .card h3 { display: flex; align-items: center; margin: 0 0 15px 0; font-size: 20px; color: #0078D4; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
         
-        /* 画像表示用の追加スタイル */
         .img-wrapper { margin-bottom: 20px; text-align: center; }
         .img-wrapper h4 { margin: 0 0 5px 0; font-size: 14px; color: #0078D4; text-align: left; font-weight: bold; }
         .img-wrapper img { max-width: 100%; height: auto; border: 1px solid #ddd; }
@@ -53,11 +52,22 @@
     <div id="result-container"></div>
 
     <script>
-        // Cloudflare WorkerのURL
         const WORKER_URL = "https://taf-proxy.bbfn2187.workers.dev";
-        
-        // 取得した画像データを保持する配列（PDF化用）
         let fetchedImages = [];
+
+        // ページ読み込み時に保存されたICAOを復元
+        window.onload = () => {
+            const savedIcao = localStorage.getItem('qmc_icao_input');
+            if (savedIcao) {
+                document.getElementById('icao-input').value = savedIcao;
+            }
+        };
+
+        // 入力内容をローカルストレージに保存
+        function saveToLocal() {
+            const val = document.getElementById('icao-input').value;
+            localStorage.setItem('qmc_icao_input', val);
+        }
 
         async function fetchImageAsBase64(icao, type) {
             try {
@@ -81,11 +91,9 @@
             const partSelect = document.querySelector('input[name="part-select"]:checked').value;
             
             const container = document.getElementById('result-container');
-            const btnPdf = document.getElementById('btn-pdf');
             
             container.innerHTML = '';
             fetchedImages = [];
-            btnPdf.style.display = 'none';
 
             if (icaos.length === 0) {
                 alert("ICAOコードを入力してください。");
@@ -93,7 +101,6 @@
             }
 
             for (const icao of icaos) {
-                // METAR/TAFツールに合わせた .card クラスを使用
                 const section = document.createElement('div');
                 section.className = 'card';
                 section.innerHTML = `<h3>${icao}</h3><p id="status-${icao}" style="color:#777; font-size:14px;">データ取得中...</p>`;
@@ -102,7 +109,6 @@
 
                 let foundAny = false;
 
-                // Part 1 (QMCD98) の取得
                 const base64Part1 = await fetchImageAsBase64(icao, 'QMCD98');
                 if (base64Part1) {
                     foundAny = true;
@@ -110,7 +116,6 @@
                     fetchedImages.push({ icao: icao, part: 'Part 1', dataUrl: base64Part1 });
                 }
 
-                // Part 2 (QMCJ98) の取得
                 if (partSelect === 'both') {
                     const base64Part2 = await fetchImageAsBase64(icao, 'QMCJ98');
                     if (base64Part2) {
@@ -121,29 +126,26 @@
                 }
 
                 if (foundAny) {
-                    statusEl.style.display = 'none'; // 成功時はステータス非表示
+                    statusEl.style.display = 'none';
                 } else {
                     statusEl.className = 'status-msg';
                     statusEl.innerText = '該当する予報図が見つかりませんでした。';
                 }
-            }
-
-            // 画像が1枚でも取得できていればPDFボタンを表示（inline-blockではなくblockやその他デザイン崩れを防ぐためinline-blockにしています）
-            if (fetchedImages.length > 0) {
-                btnPdf.style.display = 'inline-block';
             }
         }
 
         function appendImageToSection(section, dataUrl, title) {
             const wrapper = document.createElement('div');
             wrapper.className = 'img-wrapper';
-            // METARの .data-label のような見た目にするため <h4> を使用
             wrapper.innerHTML = `<h4>${title}</h4><img src="${dataUrl}" alt="${title}">`;
             section.appendChild(wrapper);
         }
 
         function downloadPDF() {
-            if (fetchedImages.length === 0) return;
+            if (fetchedImages.length === 0) {
+                alert("表示されている画像がありません。先にSearchを実行してください。");
+                return;
+            }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'mm', 'a4'); 
@@ -152,13 +154,9 @@
 
             fetchedImages.forEach((imgObj, index) => {
                 if (index > 0) doc.addPage();
-
-                // 画像の比率を維持してA4横幅に合わせる
                 const imgProps = doc.getImageProperties(imgObj.dataUrl);
                 const pdfImgWidth = pageWidth - (margin * 2);
                 const pdfImgHeight = (imgProps.height * pdfImgWidth) / imgProps.width;
-
-                // テキスト挿入処理は削除済み。Y座標を上に詰めて(marginの位置から)画像を配置
                 doc.addImage(imgObj.dataUrl, 'PNG', margin, margin, pdfImgWidth, pdfImgHeight);
             });
 
