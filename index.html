@@ -35,7 +35,7 @@
 
     <h2>飛行場時系列予報</h2>
     <div class="search-container">
-        <input type="text" id="icao-input" placeholder="ICAO (RJTT RJAA...)">
+        <input type="text" id="icao-input" placeholder="ICAO (RJTT RJAA...)" oninput="saveToLocal()">
         
         <button class="btn-search" onclick="searchImages()">Search</button>
         <button class="btn-pdf" id="btn-pdf" onclick="downloadPDF()">Download PDF</button>
